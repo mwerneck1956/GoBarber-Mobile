@@ -1,14 +1,26 @@
-import styled from "styled-components";
+import styled,{keyframes} from "styled-components";
 import signUpBackground from "../../assets/images/sign-up-background.png";
 import { shade } from "polished";
-import { sign } from "crypto";
+
 export const Container = styled.div`
   height: 100vh;
   display: flex;
   align-items: stretch;
 `;
 
+const appearFromRight = keyframes`
+  from{
+    opacity : 0;
+    transform : translateX(50px);
+  }
+  to{
+      opacity : 1;
+      transform : translateX(0);
+  }
+`;
+
 export const Content = styled.div`
+  animation: ${appearFromRight} 1s;
   display: flex;
   flex-direction: column;
   justify-content: center;

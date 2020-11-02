@@ -1,19 +1,43 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef ,Fragment } from "react";
+
+//Styles
 import { Container, Content, Background } from "./styles";
+
+//Icons
 import { FiLogIn, FiMail, FiUser, FiLock, FiArrowLeft } from "react-icons/fi";
+
+//Custom Components
 import Input from "../../components/input";
 import Button from "../../components/Button";
 import logo from "../../assets/images/logo.svg";
-import * as Yup from "yup";
-
-import getValidationError from '../../utils/getValidationError'
 import { FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
+import { Link , useHistory} from 'react-router-dom';
+
+import api from '../../services/api';
+
+import { useToast } from '../../hooks/ToastContext';
+
+//Validation
+import * as Yup from "yup";
+import getValidationError from '../../utils/getValidationError'
+
+
+interface SignUpFormData{
+  name : string,
+  email : string,
+  password : string,
+
+}
 
 const SignUp: React.FC = () => {
+
+  const { addToast } = useToast();
+  const history = useHistory();
+
   const formRef = useRef<FormHandles>(null);
 
-  const handleSubmit = useCallback(async (data: object) => {
+  const handleSubmit = useCallback(async (data: SignUpFormData) => {
     try {
       formRef.current?.setErrors({});
 
@@ -24,15 +48,32 @@ const SignUp: React.FC = () => {
           .email("Digite um email válido"),
         password: Yup.string().min(6, "Senha deve ter no mínimo de 6 dígitos"),
       });
+
       await schema.validate(data, {
         abortEarly: false,
       });
+
+      await api.post('/users' , data);
+
+      addToast({
+        type : "success",
+        title : "Cadastro Realizado com Sucesso",
+        description : "Voce já pode fazer seu logon no GoBarber"
+      })
+
+      history.push('/');
+
     } catch (err) {
       const errors = getValidationError(err);
 
       formRef.current?.setErrors(errors);
+
+      addToast({
+        type : "error",
+        title : "Ocorreu erro ao fazer cadastro , tente novamente!",
+      })
     }
-  }, []);
+  }, [addToast,history]);
 
   return (
     <Container>
@@ -51,9 +92,9 @@ const SignUp: React.FC = () => {
           />
           <Button type="submit">Cadastrar</Button>
         </Form>
-        <a href="">
+        <Link to = "/">
           <FiArrowLeft /> Voltar para logon
-        </a>
+        </Link>
       </Content>
     </Container>
   );
